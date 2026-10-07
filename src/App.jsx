@@ -19,10 +19,10 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         {/* <Route path="/" element={<Login />} /> */}
         <Route path="/login" element={<Login />}></Route>
-        {/* <Route element={<MainLayout />}>
+        <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />}></Route>
           <Route path="/user" element={<ListUser />}></Route>
-        </Route> */}
+        </Route>
       </Routes>
     </BrowserRouter>
   );
