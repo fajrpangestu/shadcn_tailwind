@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
+import { AlertCircleIcon } from "lucide-react"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Login() {
 
   const [formData, setFormData] = useState(_initialForm);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e) => {
     // prev : params
@@ -26,13 +28,33 @@ export default function Login() {
     // setFormData(function(prev){})
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async(e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/dashboard");
+
+    try {
+      const res = await fetch ("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const result = await res.json();
+      if(!res.ok) {
+        throw new Error (result.message || "Please check your email and password");
+      }
+      localStorage.setItem ("", result.data.token);
+      setTimeout(() => {
+        navigate("/dashboard");
     }, 1000);
+    } catch (error) {
+      // console.log(error.message);
+      setErrorMsg(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,13 +70,14 @@ export default function Login() {
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-lg font-semibold">Sign In your Account</CardTitle>
             <CardDescription>Enter your credential</CardDescription>
+            {errorMsg && <p className="text-red-900 flex items-center gap-2"><AlertCircleIcon/>{errorMsg}</p>}
           </CardHeader>
-
+            
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Enter your email" required autofocus />
+                <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Enter your email" required autoFocus />
               </div>
               <div className="space-y-2">
                 <Label>Password</Label>
