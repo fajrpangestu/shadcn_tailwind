@@ -41,7 +41,7 @@ export const getAllUser = async (req, res) => {
 export const getUserById = async (req, res) => {
 try {
     const id = parseInt (req.params.id);
-    const user = pool.query("SELECT id, name, email, is_active FROM users WHERE id = ?", [id]);
+    const [user] = await pool.query("SELECT id, name, email, is_active FROM users WHERE id = ?", [id]);
     if (!user) {
         res.status(404).json({
             status: false,
@@ -54,6 +54,7 @@ try {
         message: "User found",
         data: user,
     });
+
 } catch (error) {
     return res.status(500).json({
             status: false,
@@ -73,6 +74,7 @@ try {
         message: "Create user success",
         data: {id: user.insertId, name, email}
     });
+
 } catch (error) {
     return res.status(500).json({
         status: false,
@@ -104,20 +106,37 @@ try {
 }
 }
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async(req, res) => {
     const id = parseInt(req.params.id);
-    const userIndex = USERS.findIndex((u) => u.id === id);
-
-    if (userIndex === -1) {
-        return res.status(404).json({
-            status: false,
-            message: "User not found",
-        });
-    }
-
-    const deletedUser = USERS.splice (userIndex, 1)[0];
-    return res.status (200).json ({
-        status: true,
-        message: "Delete user success",
+    
+    try {
+        const user = await pool.query("DELETE FROM users WHERE id = ?", [id]);
+        return res.status(200).json({
+            status: true,
+            message: "Delete is success",
+        }); 
+        
+    } catch (error) {
+        return res.status(500).json({
+        status: false,
+        message: "Update user failed",
+        error: error.message,
     });
+    }
 }
+
+    // const userIndex = USERS.findIndex((u) => u.id === id);
+
+    // if (userIndex === -1) {
+    //     return res.status(404).json({
+    //         status: false,
+    //         message: "User not found",
+    //     });
+    // }
+
+//     const deletedUser = USERS.splice (userIndex, 1)[0];
+//     return res.status (200).json ({
+//         status: true,
+//         message: "Delete user success",
+//     });
+// }
