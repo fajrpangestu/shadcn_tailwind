@@ -1,24 +1,24 @@
 import pool from "../config/db.js";
-const USERS = [
-    {
-        id: 1,
-        name: "Reza",
-        email: "ratna@gmail.com",
-        password: "12345",
-    },
-    {
-        id: 2,
-        name: "Ratna",
-        email: "ratna@gmail.com",
-        password: "12345",
-    },
-    {
-        id: 3,
-        name: "Laras",
-        email: "ratna@gmail.com",
-        password: "12345",
-    }
-]
+// const USERS = [
+//     {
+//         id: 1,
+//         name: "Reza",
+//         email: "ratna@gmail.com",
+//         password: "12345",
+//     },
+//     {
+//         id: 2,
+//         name: "Ratna",
+//         email: "ratna@gmail.com",
+//         password: "12345",
+//     },
+//     {
+//         id: 3,
+//         name: "Laras",
+//         email: "ratna@gmail.com",
+//         password: "12345",
+//     }
+// ]
 
 export const getAllUser = async (req, res) => {
     try {
@@ -87,9 +87,13 @@ try {
 export const updateUser = async (req, res) => {
 try {
     const id = parseInt(req.params.id);
-    const {name, email, password} = req.body;
+    const {name, email, password, is_active} = req.body;
 
-    const [user] = await pool.query ("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?", [name, email, password, id]);
+    if (!password) {
+        const [user] = await pool.query ("UPDATE users SET name = ?, email = ?, is_active = ? WHERE id = ?", [name, email, is_active, id]);
+    } else {
+        const [user] = await pool.query ("UPDATE users SET name = ?, email = ?, password = ?, is_active = ? WHERE id = ?", [name, email, password, is_active, id]);
+    }
 
     return res.status(200).json({
         status: true,
@@ -106,11 +110,11 @@ try {
 }
 }
 
-export const deleteUser = async(req, res) => {
+export const deleteUser = async (req, res) => {
     const id = parseInt(req.params.id);
     
     try {
-        const user = await pool.query("DELETE FROM users WHERE id = ?", [id]);
+        await pool.query("DELETE FROM users WHERE id = ?", [id]);
         return res.status(200).json({
             status: true,
             message: "Delete is success",

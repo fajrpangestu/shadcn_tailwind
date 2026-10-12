@@ -74,3 +74,21 @@ export const updateCategory = async (req, res) => {
 }
 
 // delete
+export const deleteCategory = async(req, res) => {
+    const id = parseInt(req.params.id);
+    
+    try {
+        await pool.query("DELETE FROM categories WHERE id = ?", [id]);
+        return res.status(200).json({
+            status: true,
+            message: "Delete is success",
+        }); 
+        
+    } catch (error) {
+        return res.status(500).json({
+        status: false,
+        message: "Update user failed",
+        error: error.message,
+    });
+    }
+}
