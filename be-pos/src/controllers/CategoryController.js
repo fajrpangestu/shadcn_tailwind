@@ -43,7 +43,7 @@ export const createCategory = async (req, res) => {
         if (!name) {
             return res.status (400).json ({status: false, message: "Name must be required",})
         }
-        const category = await pool.query ("INSERT INTO categories (name) Values (?)", [name]);
+        await pool.query ("INSERT INTO categories (name) Values (?)", [name]);
         return res.status (201).json ({status: true, message: "Insert is success",});
         
     } catch (error) {
