@@ -97,7 +97,7 @@ const ListUser = () => {
           <div>
             <CardTitle className="text-xl font-bold">Data User</CardTitle>
           </div>
-          <Button variant="primary" onClick={handleOpenModal}>
+          <Button onClick={handleOpenModal}>
             Create New User
           </Button>
         </CardHeader>

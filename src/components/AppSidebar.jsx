@@ -61,16 +61,16 @@
 // }
 
 
-import { Home, Inbox, Calendar, Search, Settings, User2, ChevronUp, Store } from "lucide-react"; // 1. Menambahkan ikon Store
+import { Home, File, Settings, User2, Users, ChevronUp, Store, FileArchive } from "lucide-react"; // 1. Menambahkan ikon Store
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 
 // Menu navigasi utama
 const items = [
   { title: "Home", url: "#", icon: Home },
-  { title: "Inbox", url: "#", icon: Inbox },
-  { title: "Calendar", url: "#", icon: Calendar },
-  { title: "Search", url: "#", icon: Search },
+  { title: "Product", url: "/product", icon: FileArchive },
+  { title: "Category", url: "/category", icon: File },
+  { title: "User", url: "/user", icon: Users },
   { title: "Settings", url: "#", icon: Settings },
   { title: "Logout", url: "#", icon: Settings },
 
