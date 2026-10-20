@@ -122,9 +122,9 @@ const ProductPage = () => {
       <Card className="shadow-sm border-border p-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle className="text-xl font-bold">Data User</CardTitle>
+            <CardTitle className="text-xl font-bold">Data Product</CardTitle>
           </div>
-          <Button onClick={handleOpenModal}>Create New Product</Button>
+          <Button variant="outline" onClick={handleOpenModal}>Create New Product</Button>
         </CardHeader>
         <CardContent className="p-0">
           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -156,7 +156,7 @@ const ProductPage = () => {
                     <td>
                       <span className={`border rounded-sm p-2 ${row.is_active === 1 ? "bg-green-600" : "bg-red-600"}   text-white`}>{row.is_active === 1 ? "Active" : "In-Active"}</span>
                     </td>
-                    <td className="px-4 py-6 text-right whitespace-nowrap">
+                    <td className="px-4 py-6 whitespace-nowrap">
                       <Button onClick={() => handleEditModal(row)} size="sm" className="me-2 bg-yellow-500">
                         Edit
                       </Button>
@@ -230,7 +230,7 @@ const ProductPage = () => {
             ""
           )}
         </div>
-       
+
       </AppModal>
     </>
   );
