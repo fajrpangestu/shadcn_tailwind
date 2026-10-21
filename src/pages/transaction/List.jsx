@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "../../../components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import AppModal from "../../components/AppModal";
-import api from "@/services/api.js";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import api from "@/services/api";
 
 const ListTransaction = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const ListTransaction = () => {
 
   const fetchTransaction = async () => {
     try {
+      // get All transactions
       const response = await api.get("/transaction");
       setTransactions(response.data);
     } catch (error) {
@@ -41,11 +43,11 @@ const ListTransaction = () => {
     setIsEdit(false);
   };
 
-  const handleEditModal = (user) => {
-    console.log(user);
+  const handleEditModal = (transaction) => {
+    console.log(transaction);
     setShowModal(true);
     setIsEdit(true);
-    setFormData(user);
+    setFormData(transaction);
   };
 
   const handleCloseModal = () => {
@@ -61,35 +63,47 @@ const ListTransaction = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         is_active: parseInt(formData.is_active),
-      }
+      };
       if (isEdit) {
+        // update data
         await api.put(`/user/${formData.id}`, payload);
+        // setTransactions(transactions.map((user) => (user.id === formData.id ? formData : user)));
       } else {
+        // insert data
         await api.post("/user", payload);
+        // const newUser = {
+        //   ...formData,
+        //   id: Date.now(),
+        // };
+
+        // setTransactions([...transactions, newUser]);
       }
       setFormData(_initForm);
     } catch (error) {
-      const errorMsg = error.message;
-      console.log(errorMsg);
+      const errMsg = error.message;
+      console.log(errMsg);
     } finally {
       fetchTransaction();
       setShowModal(false);
     }
-  }
+    // jika edit data
+  };
 
   const handleDelete = async (id) => {
     const confirmation = window.confirm("Are you sure want to delete this data?");
     if (confirmation) {
+      // delete
       await api.delete(`/user/${id}`);
       fetchTransaction();
+      // setTransactions(transactions.filter((u) => u.id !== id));
     }
+    // filter: transactions
   };
 
   return (
@@ -99,9 +113,14 @@ const ListTransaction = () => {
           <div>
             <CardTitle className="text-xl font-bold">Data Transaction</CardTitle>
           </div>
-          <Button variant="outline" onClick={() => navigate("/transaction/create")}>Create New Transaction</Button>
+          <Button onClick={() => navigate("/transaction/create")}>Create New Transaction</Button>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h4 className="mb-0 fw-bold">Data Transaction</h4>
+            </div>
+          </div>
           <table className="w-full text-left text-sm">
             <thead className="border-y bg-muted/30 text-xs uppercase text-muted-foreground">
               <tr>
@@ -114,24 +133,26 @@ const ListTransaction = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {transactions.length > 0 ? (
-                transactions.map((user, index) => (
-                  <tr key={index} className="hover:bg-muted/100 transition-colors">
+                transactions.map((transaction, index) => (
+                  <tr key={index} className="hover:bg-muted/50 transition-colors">
                     <td className="px-4 py-6 whitespace-nowrap">{index + 1}</td>
-                    <td>{user.order_number}</td>
-                    <td>{user.payment_method === 1 ? "Gopay" : "Cash"}</td>
+                    <td>{transaction.order_number}</td>
+                    <td>{transaction.payment_method === 1 ? "Gopay" : "Cash"}</td>
                     <td>
                       <ul>
-                        {user.items.map((item, i) => (
-                          <li key={`${user.id}-${i}`}>{item.name}</li>
+                        {transaction.items?.map((item, itemIdx) => (
+                          <li key={itemIdx}>{item.name}</li>
                         ))}
                       </ul>
                     </td>
-
+                    {/* <td>
+                      <span className={`border rounded-sm p-2 ${user.is_active === 1 ? "bg-green-600" : "bg-red-600"}   text-white`}>{user.is_active === 1 ? "Active" : "In-Active"}</span>
+                    </td> */}
                     <td className="px-4 py-6 whitespace-nowrap">
-                      <Button onClick={() => handleEditModal(user)} size="sm" className="me-2 bg-yellow-500">
+                      <Button onClick={() => handleEditModal(transaction)} size="sm" className="me-2 bg-yellow-500">
                         Edit
                       </Button>
-                      <Button onClick={() => handleDelete(user.id)} variant="destructive" size="sm" className="me-2">
+                      <Button onClick={() => handleDelete(transaction.id)} variant="destructive" size="sm" className="me-2">
                         Delete
                       </Button>
                     </td>
@@ -140,7 +161,7 @@ const ListTransaction = () => {
               ) : (
                 <tr>
                   <td colSpan={5} className="text-center py-4 text-muted">
-                    Belum ada Data Transaction
+                    Belum ada data user
                   </td>
                 </tr>
               )}
@@ -148,62 +169,6 @@ const ListTransaction = () => {
           </table>
         </CardContent>
       </Card>
-
-      <AppModal show={showModal} onClose={handleCloseModal} title={isEdit ? "Edit User" : "Create New Transaction"} onSubmit={handleSubmit} submitLabel={isEdit ? "Save Change" : "Save"}>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="Enter your name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Password</Label>
-            <Input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required={isEdit ? false : true}
-              placeholder="Enter your password"
-            />
-          </div>
-
-          {/* Dropdown Status */}
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <select
-              name="is_active"
-              value={formData.is_active}
-              onChange={handleChange}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            >
-              <option value={1}>Active</option>
-              <option value={0}>In-Active</option>
-            </select>
-          </div>
-        </div>
-      </AppModal>
     </>
   );
 };
