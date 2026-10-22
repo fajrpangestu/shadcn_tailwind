@@ -1,24 +1,4 @@
 import pool from "../config/db.js";
-// const USERS = [
-//     {
-//         id: 1,
-//         name: "Reza",
-//         email: "ratna@gmail.com",
-//         password: "12345",
-//     },
-//     {
-//         id: 2,
-//         name: "Ratna",
-//         email: "ratna@gmail.com",
-//         password: "12345",
-//     },
-//     {
-//         id: 3,
-//         name: "Laras",
-//         email: "ratna@gmail.com",
-//         password: "12345",
-//     }
-// ]
 
 export const getAllUser = async (req, res) => {
     try {
@@ -88,17 +68,20 @@ export const updateUser = async (req, res) => {
 try {
     const id = parseInt(req.params.id);
     const {name, email, password, is_active} = req.body;
+    let update = "";
 
     if (!password) {
-        const [user] = await pool.query ("UPDATE users SET name = ?, email = ?, is_active = ? WHERE id = ?", [name, email, is_active, id]);
+        update = await pool.query ("UPDATE users SET name = ?, email = ?, is_active = ? WHERE id = ?", [name, email, is_active, id]);
     } else {
-        const [user] = await pool.query ("UPDATE users SET name = ?, email = ?, password = ?, is_active = ? WHERE id = ?", [name, email, password, is_active, id]);
+        update = pool.query ("UPDATE users SET name = ?, email = ?, password = ?, is_active = ? WHERE id = ?", [name, email, password, is_active, id])
     }
+
+    const [data] = await pool.query (`SELECT * FROM user WHERE id = ?`, [id]);
 
     return res.status(200).json({
         status: true,
         message: "Update user success",
-        data: user,
+        data: data[0]
     });
     
 } catch (error) {

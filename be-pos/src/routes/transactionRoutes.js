@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTransaction, getAllTransaction } from "../controllers/transactionController.js";
+import { createTransaction, getAllTransaction, getTransactionById } from "../controllers/transactionController.js";
 import { verifyToken } from "../middlewares/middleware.js";
 
 const router = Router ();
@@ -7,5 +7,6 @@ const router = Router ();
 router.use (verifyToken);
 router.post ("/", createTransaction);
 router.get ("/", getAllTransaction);
+router.get ("/:id", getTransactionById);
 
 export default router;
