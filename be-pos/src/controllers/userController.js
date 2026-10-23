@@ -1,13 +1,25 @@
 import pool from "../config/db.js";
+import prisma from "../config/prisma.js";
+import bcrypt from "bcrypt";
 
 export const getAllUser = async (req, res) => {
     try {
-        const [rows] = await pool.query("SELECT id, name, email, is_active FROM users");
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                created_at: true,
+                updated_at: true,
+            },
+            orderBy: { id: "desc" },
+        });
+        // const [rows] = await pool.query("SELECT id, name, email, is_active FROM users");
         return res.status(200).json({
             status: true,
             message: "Fetch user success",
-            total: rows.length,
-            data: rows,
+            total: users.length,
+            data: users,
         });
     } catch (error) {
         return res.status(500).json({
@@ -19,111 +31,121 @@ export const getAllUser = async (req, res) => {
 }
 
 export const getUserById = async (req, res) => {
-try {
-    const id = parseInt (req.params.id);
-    const [user] = await pool.query("SELECT id, name, email, is_active FROM users WHERE id = ?", [id]);
-    if (!user) {
-        res.status(404).json({
-            status: false,
-            message: "User not found",
-        });
-    } 
-    
-    res.status(200).json({
-        status: true,
-        message: "User found",
-        data: user,
-    });
+    try {
+        const id = parseInt(req.params.id);
 
-} catch (error) {
-    return res.status(500).json({
+        const user = await prisma.user.findUnique({
+            where: { id: id },
+        })
+        // const [user] = await pool.query("SELECT id, name, email, is_active FROM users WHERE id = ?", [id]); 
+
+        res.status(200).json({
+            status: true,
+            message: "User found",
+            data: user,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
             status: false,
             message: "Fail fetch user",
             error: error.message,
-    });
+        });
     }
 }
 
 export const createUser = async (req, res) => {
-    const {name, email, password} = req.body;
+    const { name, email, password } = req.body;
 
-try {    
-    const [user] = await pool.query ("INSERT INTO users (name, email, password) VALUES (?,?,?)", [name, email, password])
-    return res.status (201).json ({
-        status: true,
-        message: "Create user success",
-        data: {id: user.insertId, name, email}
-    });
+    try {
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+            },
+        });
+        // const [user] = await pool.query ("INSERT INTO users (name, email, password) VALUES (?,?,?)", [name, email, password])
 
-} catch (error) {
-    return res.status(500).json({
-        status: false,
-        message: "Create user failed",
-        error: error.message
-    });
+        return res.status(201).json({
+            status: true,
+            message: "Create user success",
+            data: user,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Create user failed",
+            error: error.message
+        });
     }
 };
 
 export const updateUser = async (req, res) => {
-try {
-    const id = parseInt(req.params.id);
-    const {name, email, password, is_active} = req.body;
-    let update = "";
+    try {
+        const id = parseInt(req.params.id);
+        const { name, email, password, is_active } = req.body;
+        let update = "";
 
-    if (!password) {
-        update = await pool.query ("UPDATE users SET name = ?, email = ?, is_active = ? WHERE id = ?", [name, email, is_active, id]);
-    } else {
-        update = pool.query ("UPDATE users SET name = ?, email = ?, password = ?, is_active = ? WHERE id = ?", [name, email, password, is_active, id])
+        const dataUpdate = {}
+        if (email) dataUpdate.email = email;
+        if (name) dataUpdate.name = name;
+        if (password) {
+            dataUpdate.password = await bcrypt.hash(password, 10);
+        }
+
+        const user = await prisma.user.update ({
+            where: {id: id},
+            data: dataUpdate,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                created_at: true,
+                updated_at: true,
+            },
+        });
+
+        return res.status(200).json({
+            status: true,
+            message: "Update user success",
+            data: user,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: "Update user failed",
+            error: error.message
+        });
     }
-
-    const [data] = await pool.query (`SELECT * FROM user WHERE id = ?`, [id]);
-
-    return res.status(200).json({
-        status: true,
-        message: "Update user success",
-        data: data[0]
-    });
-    
-} catch (error) {
-    return res.status(500).json({
-        status: false,
-        message: "Update user failed",
-        error: error.message
-    });
-}
 }
 
 export const deleteUser = async (req, res) => {
     const id = parseInt(req.params.id);
-    
+
     try {
-        await pool.query("DELETE FROM users WHERE id = ?", [id]);
+        await prisma.user.delete({
+            where: { id: id },
+        });
+        // await pool.query("DELETE FROM users WHERE id = ?", [id]);
+
         return res.status(200).json({
             status: true,
-            message: "Delete is success",
-        }); 
-        
+            message: "Delete user success",
+        });
+
     } catch (error) {
         return res.status(500).json({
-        status: false,
-        message: "Update user failed",
-        error: error.message,
-    });
+            status: false,
+            message: "Update user failed",
+            error: error.message,
+        });
     }
 }
-
-    // const userIndex = USERS.findIndex((u) => u.id === id);
-
-    // if (userIndex === -1) {
-    //     return res.status(404).json({
-    //         status: false,
-    //         message: "User not found",
-    //     });
-    // }
-
-//     const deletedUser = USERS.splice (userIndex, 1)[0];
-//     return res.status (200).json ({
-//         status: true,
-//         message: "Delete user success",
-//     });
-// }

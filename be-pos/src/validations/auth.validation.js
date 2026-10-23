@@ -6,7 +6,7 @@ export const loginSchema = Joi.object({
         "string.email": "The email format must be an email address",
         "string.required": "Email is required",
     }),
-    password: Joi.string().regex(/^[0-9+]{7}-[0-9+]{1}$/).min(8).required().messages({
+    password: Joi.string().min(8).required().messages({
         "string.empty": "Password cannot be empty",
         "string.min": "Minimum length password is 8 characters",
         "string.required": "Password is required",
